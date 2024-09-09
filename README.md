@@ -2,7 +2,7 @@
 
 ## Description
 
-> [!NOTE] Disclaimer  
+> [!NOTE]  
 > As part of our course, workshops suggest developing a project based on business tasks and their implementation through libraries
 >
 > The main goal is to develope a **music recommendation application**.
