@@ -1,7 +1,10 @@
+import csv
+
 LAST_INDEX = 19
 
 
 def reading_data(path: str = "data/Spotify_Youtube.csv"):
+    """returns data from given csv(hand version)"""
     big_data = []
     with open(path) as f:
         header = [i for i in f.readline().strip().split(',')]
@@ -17,9 +20,46 @@ def reading_data(path: str = "data/Spotify_Youtube.csv"):
     return header, big_data
 
 
+def reading_data_2(path: str = "data/Spotify_Youtube.csv"):
+    """returns data from given csv(csv lib version)"""
+    data = []
+    with open(path) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            data.append(row)
+    header = data[0]
+    return header, data[1:]
+
+
+def size(data: list) -> [int, int]:
+    """receive size of dataset NxM"""
+    return len(data), len(data[0])
+
+
+def get_max_min(data: list[list[str]], column: int) -> [float, float]:
+    """returns max and minimum element from specific column of dataset
+    (exceptions included)
+    """
+    if 0 > column > len(data):
+        raise IndexError('out of bounds')
+    temp_data = [float(row[column]) for row in data if row[column].replace('.', '', 1).isdigit()]
+    if len(temp_data) > 0.8*len(data):
+        return max(temp_data), min(temp_data)
+    raise TypeError('wrong column(int column expected)')
+
+
+def get_top_n_artists(data: list[list[str]], n: int = 5) -> [str]:
+    """returns top n popular artists(aka with most amount of songs)"""
+    artists_songs = dict()
+    for row in data:
+        artists_songs[row[1]] = artists_songs.get(row[1], 0)+1
+    return sorted(artists_songs.items(), key=lambda x: x[1], reverse=True)
+
+
 def main():
-    header, data = reading_data()
-    return
+    header, data = reading_data_2()
+    print(header)
+    print(get_max_min(data, 7))
 
 
 if __name__ == "__main__":
