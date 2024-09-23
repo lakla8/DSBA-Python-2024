@@ -1,6 +1,9 @@
-import csv
+import argparse, csv
 
 LAST_INDEX = 19
+ARTISTS_AMOUNT = 5
+COLUMN = 8
+parser = argparse.ArgumentParser()
 
 
 def reading_data(path: str = "data/Spotify_Youtube.csv"):
@@ -53,13 +56,28 @@ def get_top_n_artists(data: list[list[str]], n: int = 5) -> [str]:
     artists_songs = dict()
     for row in data:
         artists_songs[row[1]] = artists_songs.get(row[1], 0)+1
-    return sorted(artists_songs.items(), key=lambda x: x[1], reverse=True)
+    return sorted(artists_songs.items(), key=lambda x: x[1], reverse=True)[:n]
+
+
+def parser_config(arg_parser: argparse.ArgumentParser()):
+    """parser settings configuration"""
+    arg_parser.add_argument('-c', "--column", type=int, help='specify column for max-min method')
+    arg_parser.add_argument('-n', "--number", type=int, help='top n artists from data')
+
+
+def arguments():
+    """read arguments from console or putting saved constants"""
+    args = parser.parse_args()
+    return args.column or COLUMN, args.number or ARTISTS_AMOUNT
 
 
 def main():
+    parser_config(parser)
     header, data = reading_data_2()
+    column, n = arguments()
     print(header)
-    print(get_max_min(data, 7))
+    print(get_max_min(data, column))
+    print(get_top_n_artists(data, n))
 
 
 if __name__ == "__main__":
