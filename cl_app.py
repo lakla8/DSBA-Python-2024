@@ -1,9 +1,55 @@
-import argparse, csv
+import argparse
+import csv
+import pandas as pd
 
 LAST_INDEX = 19
 ARTISTS_AMOUNT = 5
 COLUMN = 8
+COLUMNS_LIST = ['Danceability', 'Energy', 'Loudness', 'Speechiness','Acousticness', 'Instrumentalness', 'Liveness', 'Valence', 'Tempo']
 parser = argparse.ArgumentParser()
+
+
+class Song:
+    def __init__(self, line):
+        self.Artist = line.Artist
+        self.Track: str = line.Track
+        self.Album = line.Album
+        self.Likes = line.Likes
+        self.Duration_ms = line.Duration_ms
+        self.Musicality = line.loc[COLUMNS_LIST].values
+
+    def __repr__(self):
+        return f"{self.Artist}, {self.Track}, {self.Album}, {self.Likes}, {self.Duration_ms}, {self.Musicality}"
+
+
+class Database:
+    def __init__(self, path: str):
+        self.db = dict()
+        df = pd.read_csv(path, index_col=0)
+        df.dropna(subset=COLUMNS_LIST, inplace=True)
+        for i in range(df.shape[0]):
+            line = df.iloc[i]
+            self.add_song(line)
+
+    def add_song(self, line):
+        self.db[line.Artist] = self.db.get(line.Artist, []) + [Song(line)]
+
+    def search(self, request: str) -> list[str]:
+        similar_songs = []
+        for song in sum(self.db.values(), []):
+            if song.Track.lower().find(request.lower()) != -1:
+                similar_songs.append(song)
+        return similar_songs
+
+    def search_similar(self, song: Song, n: int = 5):
+        similar_song = []
+        pass
+
+    def print(self):
+        print(self.db)
+
+    def max_songs(self):
+        return max(self.db, key=lambda x: len(self.db[x]))
 
 
 def reading_data(path: str = "data/Spotify_Youtube.csv"):
@@ -72,12 +118,16 @@ def arguments():
 
 
 def main():
+    db = Database("data/Spotify_Youtube.csv")
+    # print(db.max_songs())
+    # db.print()
+    print(db.search_single('aaa'))
     parser_config(parser)
     header, data = reading_data_2()
     column, n = arguments()
-    print(header)
-    print(get_max_min(data, column))
-    print(get_top_n_artists(data, n))
+    # print(header)
+    # print(get_max_min(data, column))
+    # print(get_top_n_artists(data, n))
 
 
 if __name__ == "__main__":
