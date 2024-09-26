@@ -1,11 +1,13 @@
 import argparse
 import csv
 import pandas as pd
+from collections import deque
 
 LAST_INDEX = 19
 ARTISTS_AMOUNT = 5
 COLUMN = 8
-COLUMNS_LIST = ['Danceability', 'Energy', 'Loudness', 'Speechiness','Acousticness', 'Instrumentalness', 'Liveness', 'Valence', 'Tempo']
+COLUMNS_LIST = ['Danceability', 'Energy', 'Loudness', 'Speechiness','Acousticness', 'Instrumentalness', 'Liveness',
+                'Valence', 'Tempo']
 parser = argparse.ArgumentParser()
 
 
@@ -27,23 +29,51 @@ class Database:
         self.db = dict()
         df = pd.read_csv(path, index_col=0)
         df.dropna(subset=COLUMNS_LIST, inplace=True)
+        for column in COLUMNS_LIST:
+            df.loc[:, column] = (df[column] - df[column].min()) / (df[column].max() - df[column].min())
         for i in range(df.shape[0]):
             line = df.iloc[i]
             self.add_song(line)
 
+    @staticmethod
+    def euclid_sum(vec1, vec2):
+        sum_vec = 0
+        for i in range(len(vec1)):
+            sum_vec += (vec1[i] - vec2[i]) ** 2
+        return sum_vec ** 0.5
+
     def add_song(self, line):
         self.db[line.Artist] = self.db.get(line.Artist, []) + [Song(line)]
 
-    def search(self, request: str) -> list[str]:
+    def search(self, request: str) -> Song:
         similar_songs = []
         for song in sum(self.db.values(), []):
             if song.Track.lower().find(request.lower()) != -1:
                 similar_songs.append(song)
-        return similar_songs
+        for i, song in enumerate(similar_songs):
+            print(f"{i + 1}, {song.Track} by {song.Artist}")
+        user_choice = int(input("Which song do you meant?\n"))
+        return similar_songs[user_choice - 1]
 
-    def search_similar(self, song: Song, n: int = 5):
-        similar_song = []
-        pass
+    def search_similar(self, target_song: Song, n: int = 5):
+        similar_song = [] # deque([], maxlen=5)
+        for i, song in enumerate(sum(self.db.values(), [])):
+            if target_song == song:
+                continue
+            value = self.euclid_sum(target_song.Musicality, song.Musicality)
+            similar_song.append((i, value))
+            # if len(similar_song) == 0:
+            #     similar_song.append((i, value))
+            # else:
+            #     while True:
+            #         mid_elem = len(similar_song) // 2
+            #         if value > similar_song[mid_elem][1]:
+            #             mid_elem += (len(similar_song) - mid_elem) // 2
+            #         elif value == similar_song[mid_elem][1]:
+            #             similar_song.insert(mid_elem + 1, (i, value))
+            #         else:
+            #
+        return sorted(similar_song, key=lambda x: x[1], reverse=True)[:n]
 
     def print(self):
         print(self.db)
@@ -119,15 +149,9 @@ def arguments():
 
 def main():
     db = Database("data/Spotify_Youtube.csv")
-    # print(db.max_songs())
-    # db.print()
-    print(db.search_single('aaa'))
+    print(db.search_similar(db.search('aaa'), 5))
     parser_config(parser)
-    header, data = reading_data_2()
-    column, n = arguments()
-    # print(header)
-    # print(get_max_min(data, column))
-    # print(get_top_n_artists(data, n))
+
 
 
 if __name__ == "__main__":
