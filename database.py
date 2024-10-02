@@ -1,5 +1,5 @@
 import pandas as pd
-from parser import get_tags_by_artist
+from parser import get_tags_by_artist, get_lyrics_for_song
 from tqdm import tqdm
 
 COLUMNS_LIST = ['Danceability', 'Energy', 'Loudness', 'Speechiness','Acousticness', 'Instrumentalness', 'Liveness',
@@ -12,11 +12,16 @@ class Song:
         self.Track: str = line.Track
         self.Album = line.Album
         self.Likes = line.Likes
+        self.Lyrics = []
         self.Duration_ms = line.Duration_ms
         self.Musicality = line.loc[COLUMNS_LIST].values
 
     def __repr__(self):
         return f"{self.Artist}, {self.Track}, {self.Album}, {self.Likes}, {self.Duration_ms}, {self.Musicality}"
+
+    def get_lyrics_for_song(self):
+        self.Lyrics = get_lyrics_for_song(self)
+        return self.Lyrics
 
 
 class Database:
