@@ -1,6 +1,5 @@
 from database import Database
 import random
-from parser import get_lyrics_for_song
 
 
 def main(db):

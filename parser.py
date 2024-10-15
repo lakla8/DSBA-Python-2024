@@ -20,7 +20,7 @@ def get_tags_by_artist(artist: str) -> list[str]:
         return []
 
 
-def get_lyrics_for_song(song) -> list[str]:
+def get_lyrics_for_song(song) -> list[str] | AttributeError:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
     response = requests.get(BASE_URL_LYRICS.format('-'.join(song.Artist.replace('\'', '').split() + song.Track.split()), headers=headers))
     if response.status_code != 200:
@@ -37,4 +37,4 @@ def get_lyrics_for_song(song) -> list[str]:
     try:
         return lyrics
     except AttributeError as err:
-        return str(err)
+        return err
